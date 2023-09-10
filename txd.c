@@ -713,16 +713,16 @@ static int decode_opcode ()
 		case V7:
 		case V8:
 		switch (code) {
-			caseline (0x0B, "PRINT_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      NONE,   PLAIN);   //new in z-spec 1.1
-			caseline (0x0C, "CHECK_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      STORE,  PLAIN);   //new in z-spec 1.1
-			caseline (0x0D, "SET_TRUE_COLOUR", NUMBER,   NUMBER,   NIL,      NIL,      NONE,   PLAIN);   //new in z-spec 1.1
+			caseline (0x0B, "PRINT_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      NONE,   PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
+			caseline (0x0C, "CHECK_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      STORE,  PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
+			caseline (0x0D, "SET_TRUE_COLOUR", NUMBER,   NUMBER,   NIL,      NIL,      NONE,   PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
 		}
 		case V6:
 		switch (code) {
-			caseline (0x0B, "PRINT_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      NONE,   PLAIN);   //new in z-spec 1.1
-			caseline (0x0C, "CHECK_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      STORE,  PLAIN);   //new in z-spec 1.1
-			caseline (0x0D, "SET_TRUE_COLOUR", NUMBER,   NUMBER,   NUMBER,   NIL,      NONE,   PLAIN);   //new in z-spec 1.1
-			caseline (0x1D, "BUFFER_SCREEN",   LOW_ADDR, NIL,      NIL,      NIL,      NONE,   PLAIN);   //new in z-spec 1.1
+			caseline (0x0B, "PRINT_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      NONE,   PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
+			caseline (0x0C, "CHECK_UNICODE",   NUMBER,   NIL,      NIL,      NIL,      STORE,  PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
+			caseline (0x0D, "SET_TRUE_COLOUR", NUMBER,   NUMBER,   NUMBER,   NIL,      NONE,   PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
+			caseline (0x1D, "BUFFER_SCREEN",   LOW_ADDR, NIL,      NIL,      NIL,      NONE,   PLAIN);   // 7.4 - new in z-spec 1.1. /HÅS
 		}
 		}
 		return (
@@ -936,7 +936,7 @@ static int decode_opcode ()
 	    caseline (0x03, "PRINT_RET",       NIL,      NIL,      NIL,      NIL,      TEXT,   RETURN);
 	    caseline (0x04, "NOP",             NIL,      NIL,      NIL,      NIL,      NONE,   PLAIN);
 
-	    caseline (0x07, "RESTART",         NIL,      NIL,      NIL,      NIL,      NONE,   RETURN); // this should also be a RETURN-type
+	    caseline (0x07, "RESTART",         NIL,      NIL,      NIL,      NIL,      NONE,   RETURN); // 7.4 - this should also be a RETURN-type. /HÅS
 	    caseline (0x08, "RET_POPPED",      NIL,      NIL,      NIL,      NIL,      NONE,   RETURN);
 
 	    caseline (0x0A, "QUIT",            NIL,      NIL,      NIL,      NIL,      NONE,   RETURN);
@@ -1110,9 +1110,9 @@ int type;
 
 	if (!decode.first_pass) {
 		if (opcode.opcode == 0xBA || opcode.opcode == 0xB7) {
-			// QUIT or RESTART (should this be expanded to other RETURN-types?)
-			// These are considered as RETURN-type if the next opcode is illegal, otherwise they are PLAIN.
-			// If the next address is a valid routine start, it is also considered as RETURN.
+			// 7.4 - QUIT or RESTART (should this be expanded to other RETURN-types?)
+			//       These are considered as RETURN-type if the next opcode is illegal, otherwise they are PLAIN.
+			//       If the next address is a valid routine start, it is also considered as RETURN. /HÅS
 			if
 				((decode.pc - (unsigned long)story_scaler * header.strings_offset) % (decode.pc * code_scaler) == 0 && read_data_byte(decode.pc + 1) < 16) {
 				// Valid entrypoint for routine, keep type as RETURN
@@ -1843,8 +1843,10 @@ static int in_dictionary (word_address)
 unsigned long word_address;
 #endif
 {
-
-    if (word_address < dict_start || word_address > dict_end)
+	// 7.4 - dict_end is actually the first byte after the end of the dictionary (code_base).
+	//       If there's an array starting at dict_end this could wrongly be identified as a
+	//       dictionary entry (changed '>' to '>='). /HÅS
+    if (word_address < dict_start || word_address >= dict_end)
 	return (0);
 
     if ((word_address - dict_start) % word_size == 0)
