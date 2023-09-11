@@ -1422,13 +1422,9 @@ int opers;
 	    string = lookup_string (addr);
 	    if (string != 0)
 		tx_printf ("%c%03d", (option_inform) ? 's' : 'S', (int) string);
-	    else {
-#ifndef TXD_DEBUG
-		(void) fprintf (stderr,
-				"\nWarning: printing of nonexistent string\n");
-#endif
-		tx_printf ("%lx", addr);
-	    }
+	    else
+		// 7.4 - Print "invalid string" inline, instead of to stderr. /HÅS
+		tx_printf ("[invalid string: %lx]", addr);
 	}
 	break;
 
