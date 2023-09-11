@@ -2245,9 +2245,15 @@ int varnum;
 	    tx_printf ("local%d", varnum - 1);
 	else
 	    tx_printf ("L%02x", varnum - 1);
-    } else if (option_symbols &&
-	       print_global_name (start_of_routine, varnum - 16)) /* null */
-	;
-    else
-	tx_printf ("%c%02x", (option_inform) ? 'g' : 'G', varnum - 16);
+	}
+	// 7.4 - Print "invalid variable", if variable is outside legal range /HÅS
+	else if (varnum < 256) {
+		if (option_symbols &&
+			print_global_name(start_of_routine, varnum - 16)) /* null */
+			;
+		else
+			tx_printf("%c%02x", (option_inform) ? 'g' : 'G', varnum - 16);
+	}
+	else
+		tx_printf("[invalid variable: %lx]", varnum);
 }
