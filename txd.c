@@ -762,7 +762,7 @@ static int decode_opcode ()
 
 	    caseline (0x21, "STOREW",          LOW_ADDR, NUMBER,   ANYTHING, NIL,      NONE,   PLAIN);
 	    caseline (0x22, "STOREB",          LOW_ADDR, NUMBER,   ANYTHING, NIL,      NONE,   PLAIN);
-	    caseline (0x23, "PUT_PROP",        OBJECT,   NUMBER,   ANYTHING, NIL,      NONE,   PLAIN);
+	    caseline (0x23, "PUT_PROP",        OBJECT,   PROPNUM,  ANYTHING, NIL,      NONE,   PLAIN);		// 7.4 - changed operand 2 from NUMBER to PROPNUM. /HÅS
 
 	    caseline (0x25, "PRINT_CHAR",      PCHAR,    NIL,      NIL,      NIL,      NONE,   PLAIN);
 	    caseline (0x26, "PRINT_NUM",       NUMBER,   NIL,      NIL,      NIL,      NONE,   PLAIN);
