@@ -52,7 +52,7 @@ unsigned long *attr_names_end;
 	header.serial[4] >= '0' && header.serial[4] <= '3' &&
 	header.serial[5] >= '0' && header.serial[5] <= '9' &&
 	header.serial[0] != '8') {
-	if (header.name[4] >= '6') {
+	if (header.name[4] >= '6' && header.name[4] <= '9') {		// 7.4 Exclude ZAPF and Dialog. /HÅS 
 	    *inform_version = (header.name[4] - '0') * 100 +
 			      (header.name[6] - '0') * 10 +
 			      (header.name[7] - '0');
@@ -70,7 +70,8 @@ unsigned long *attr_names_end;
 		*attr_names_end = address - 1;
 		/* then come the action names, the individual property values, the dynamic arrays, etc */
 	    }
-	}
+	} else
+	*inform_version = 0;										// 7.4 Force ZAPF and Dialog to 0. /HÅS
     } else
 	*inform_version = 0;
     tx_printf ("Inform Version: %d\n", *inform_version);

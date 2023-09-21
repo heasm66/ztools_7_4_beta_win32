@@ -251,24 +251,24 @@ unsigned long *prep_table_end;
     *parser_type = 0;
     *prep_type = 0;
 
- //   if (!memcmp (&header.name[4], "ZAPF", 4)) {
-	//configure_zapf_parse_tables (verb_count,
-	//			     action_count,
-	//			     parse_count,
-	//			     parser_type,
-	//			     prep_type,
-	//			     verb_table_base,
-	//			     verb_table_end,
-	//			     verb_data_base,
-	//			     verb_data_end,
-	//			     action_table_base,
-	//			     action_table_end,
-	//			     preact_table_base,
-	//			     preact_table_end,
-	//			     prep_table_base,
-	//			     prep_table_end);
-	//return;
- //   }
+    if (!memcmp (&header.name[4], "ZAPF", 4)) {
+	configure_zapf_parse_tables (verb_count,
+				     action_count,
+				     parse_count,
+				     parser_type,
+				     prep_type,
+				     verb_table_base,
+				     verb_table_end,
+				     verb_data_base,
+				     verb_data_end,
+				     action_table_base,
+				     action_table_end,
+				     preact_table_base,
+				     preact_table_end,
+				     prep_table_base,
+				     prep_table_end);
+	return;
+    }
     if (header.serial[0] >= '0' && header.serial[0] <= '9' &&
 	header.serial[1] >= '0' && header.serial[1] <= '9' &&
 	header.serial[2] >= '0' && header.serial[2] <= '1' &&
@@ -580,176 +580,205 @@ void configure_zapf_parse_tables (unsigned int *verb_count,
 				  unsigned long *prep_table_base,
 				  unsigned long *prep_table_end)
 #else
-//#error /* TODO -- write the K&R definition or remove K&R completely */
+void configure_zapf_parse_tables(verb_count,
+				action_count,
+				parse_count,
+				parser_type,
+				prep_type,
+				verb_table_base,
+				verb_table_end,
+				verb_data_base,
+				verb_data_end,
+				action_table_base,
+				action_table_end,
+				preact_table_base,
+				preact_table_end,
+				prep_table_base,
+				prep_table_end)
+unsigned int* verb_count;
+unsigned int* action_count;
+unsigned int* parse_count;
+unsigned int* parser_type;
+unsigned int* prep_type;
+unsigned long* verb_table_base;
+unsigned long* verb_table_end;
+unsigned long* verb_data_base;
+unsigned long* verb_data_end;
+unsigned long* action_table_base;
+unsigned long* action_table_end;
+unsigned long* preact_table_base;
+unsigned long* preact_table_end;
+unsigned long* prep_table_base;
+unsigned long* prep_table_end;
 #endif
-//{
-//    /*
-//     * For Zilf "old grammar", the preposition table is first, followed by the
-//     * verb table.  Then the action table, then the pre-action table, then the
-//     * verb data.  Verb and preposition count can be found though the
-//     * dictionary; we can then find the tables (between IMPURE and ENDLOD --
-//     * that is header.dynamic_size and header.resident_size)
-//     */
-//    unsigned long address, word_address;
-//    unsigned short word_size;
-//    unsigned short word_text_size;
-//    unsigned short word_count;
-//    unsigned long first_word;
-//    unsigned long last_word;
-//    unsigned int dict_verb_count = 0;
-//    unsigned int dict_prep_count = 0;
-//    unsigned long next_entry;
-//    unsigned int entry_count;
-//    unsigned short attempts = 3;
-//
-//    *verb_table_base = 0;
-//    *verb_table_end = 0;
-//    *verb_data_base = 0;
-//    *action_table_base = 0;
-//    *action_table_end = 0;
-//    *preact_table_base = 0;
-//    *preact_table_end = 0;
-//    *prep_table_base = 0;
-//    *prep_table_end = 0;
-//    *verb_count = 0;
-//    *action_count = 0;
-//    /* ZILF non-compact old grammar uses infocom_fixed.  If COMPACT-SYNTAX? is set, it's
-//     * infocom_variable.  New grammar is infocom_v6 but not yet supported. */
-//    *parser_type = infocom_fixed;
-//    /* ZILF non-compact grammar uses prep_type 0; that is, the preposition
-//       number is stored in a word, wasting a byte.  If COMPACT-VOCABULARY? is set, it
-//       uses type 1. */
-//    *prep_type = 0;
-//    *parse_count = 0;
-//
-//    /* Calculate dictionary bounds and entry size */
-//    /* TODO: make a subroutine for this in showdict.c */
-//
-//    address = (unsigned long) header.dictionary;
-//    word_text_size = header.version < V4 ? 4 : 6;
-//    address += (unsigned long) read_data_byte (&address); /* skip separators */
-//    word_size = read_data_byte (&address);
-//    /* If dictionary has few extra bytes, COMPACT_VOCABULARY? is set */
-//    if (word_size - word_text_size < 3)
-//	*prep_type = 1;
-//    word_count = read_data_word (&address);
-//    first_word = address;
-//    last_word = address + ((word_count - 1) * word_size);
-//    for (word_address = first_word; word_address <= last_word;
-//	 word_address += word_size) {
-//	int flags;
-//	int d1, d2 = 0xFF;
-//	address = word_address + word_text_size;
-//	flags = read_data_byte (&address);
-//	d1 = read_data_byte (&address);
-//	if (*prep_type == 0)
-//	    d2 = read_data_byte (&address);
-//	if (flags & VERB) {
-//	    unsigned int verb_num =
-//		(flags & DATA_FIRST) == VERB_FIRST ? d1 : d2;
-//	    verb_num ^= 0xFF;
-//	    if (dict_verb_count < verb_num)
-//		dict_verb_count = verb_num;
-//	}
-//	if (flags & PREP) {
-//	    /* Can't usefully read prepositions from dictionary when compact. */
-//	    if (*prep_type == 0) {
-//		unsigned int prep_num =
-//		    (flags & DATA_FIRST) == PREP_FIRST ? d1 : d2;
-//		prep_num ^= 0xFF;
-//		if (dict_prep_count < prep_num)
-//		    dict_prep_count = prep_num;
-//	    } else {
-//		dict_prep_count++;
-//	    }
-//	}
-//    }
-//    dict_verb_count++;
-//    if (*prep_type == 0)
-//	dict_prep_count++;
-//    address = header.dynamic_size;
-//    while (!*prep_table_base && address < header.resident_size) {
-//	unsigned int length_hi = read_data_byte (&address);
-//	unsigned int i;
-//	unsigned long prep_address = address;
-//	if (length_hi == 0 &&
-//	    read_data_byte (&prep_address) == dict_prep_count) {
-//	    for (i = 0; i < dict_prep_count; i++) {
-//		unsigned int prep_num;
-//		unsigned int flags;
-//		unsigned long word_address = read_data_word (&prep_address);
-//		/* Check if we've found a dictionary word */
-//		if (word_address < first_word || word_address > last_word ||
-//		    ((word_address - first_word) % word_size != 0))
-//		    break;
-//
-//		/* Check if that word is a preposition, and if so, the right
-//		   preposition */
-//		if (*prep_type == 0) {
-//		    /* The prep_num here is the inverted (255-based) number */
-//		    prep_num = read_data_word (&prep_address);
-//		    word_address += word_text_size;
-//		    flags = read_data_byte (&word_address);
-//		    if (!(flags & PREP))
-//			break;
-//		    if ((flags & DATA_FIRST) != PREP_FIRST)
-//			word_address++;
-//		    if (prep_num != read_data_byte (&word_address))
-//			break;
-//		} else {
-//		    /* The prep_num here is the inverted (255-based) number */
-//		    prep_num = read_data_byte (&prep_address);
-//		    /* Can only tell if number is sane, not if it is correct */
-//		    if ((prep_num ^= 0xFF) >= dict_prep_count)
-//			break;
-//		}
-//	    }
-//	    if (i == dict_prep_count) {
-//		*prep_table_base = address - 1;
-//	    }
-//	}
-//	/* Due to a bug in ZILF, some prepositions can be missing from the table.  Allow
-//           for this */
-//	if (!*prep_table_base && *prep_type == 0 &&
-//	    address >= header.resident_size && dict_prep_count > 0 &&
-//	    --attempts > 0) {
-//	    address = header.dynamic_size;
-//	    dict_prep_count--;
-//	}
-//    }
-//    /* Can't find the tables, sorry */
-//    if (!*prep_table_base)
-//	return;
-//    *verb_count = dict_verb_count;
-//    /* Verb table immediately follows prep table */
-//    if (*prep_type == 0) {
-//	*verb_table_base = *prep_table_base + 2 + dict_prep_count * 4;
-//    } else {
-//	*verb_table_base = *prep_table_base + 2 + dict_prep_count * 3;
-//    }
-//    *prep_table_end = *verb_table_base - 1;
-//    /* Verb data base is given by first entry in verb table */
-//    address = *verb_table_base;
-//    *verb_data_base = read_data_word (&address);
-//    *verb_data_end = header.resident_size - 1;
-//    /* Same as for Infocom, detect variable-length grammar (COMPACT-SYNTAX?) */
-//    if (dict_verb_count > 1)
-//	next_entry = read_data_word (&address);
-//    else
-//	next_entry = *verb_data_end;
-//    address = *verb_data_base;
-//    entry_count = read_data_byte (&address);
-//    if (((next_entry - *verb_data_base) / entry_count) <= 7)
-//	*parser_type = infocom_variable;
-//    /* Actions and pre-actions are sandwiched between verb table and verb data */
-//    *action_table_base = *verb_table_base + dict_verb_count * 2;
-//    *verb_table_end = *action_table_base - 1;
-//    /* Each table entry is 2 bytes and there's two tables, hence the 4 */
-//    *action_count = (*verb_data_base - *action_table_base) / 4;
-//    *preact_table_base = *action_table_base + *action_count * 2;
-//    *preact_table_end = *verb_data_base - 1;
-//    *action_table_end = *preact_table_base - 1;
-//}
+{
+    /*
+     * For Zilf "old grammar", the preposition table is first, followed by the
+     * verb table.  Then the action table, then the pre-action table, then the
+     * verb data.  Verb and preposition count can be found though the
+     * dictionary; we can then find the tables (between IMPURE and ENDLOD --
+     * that is header.dynamic_size and header.resident_size)
+     */
+    unsigned long address, word_address;
+    unsigned short word_size;
+    unsigned short word_text_size;
+    unsigned short word_count;
+    unsigned long first_word;
+    unsigned long last_word;
+    unsigned int dict_verb_count = 0;
+    unsigned int dict_prep_count = 0;
+    unsigned long next_entry;
+    unsigned int entry_count;
+    unsigned short attempts = 3;
+
+    *verb_table_base = 0;
+    *verb_table_end = 0;
+    *verb_data_base = 0;
+    *action_table_base = 0;
+    *action_table_end = 0;
+    *preact_table_base = 0;
+    *preact_table_end = 0;
+    *prep_table_base = 0;
+    *prep_table_end = 0;
+    *verb_count = 0;
+    *action_count = 0;
+    /* ZILF non-compact old grammar uses infocom_fixed.  If COMPACT-SYNTAX? is set, it's
+     * infocom_variable.  New grammar is infocom_v6 but not yet supported. */
+    *parser_type = infocom_fixed;
+    /* ZILF non-compact grammar uses prep_type 0; that is, the preposition
+       number is stored in a word, wasting a byte.  If COMPACT-VOCABULARY? is set, it
+       uses type 1. */
+    *prep_type = 0;
+    *parse_count = 0;
+
+    /* Calculate dictionary bounds and entry size */
+    /* TODO: make a subroutine for this in showdict.c */
+
+    address = (unsigned long) header.dictionary;
+    word_text_size = header.version < V4 ? 4 : 6;
+    address += (unsigned long) read_data_byte (&address); /* skip separators */
+    word_size = read_data_byte (&address);
+    /* If dictionary has few extra bytes, COMPACT_VOCABULARY? is set */
+    if (word_size - word_text_size < 3)
+	*prep_type = 1;
+    word_count = read_data_word (&address);
+    first_word = address;
+    last_word = address + ((word_count - 1) * word_size);
+    for (word_address = first_word; word_address <= last_word;
+	 word_address += word_size) {
+	int flags;
+	int d1, d2 = 0xFF;
+	address = word_address + word_text_size;
+	flags = read_data_byte (&address);
+	d1 = read_data_byte (&address);
+	if (*prep_type == 0)
+	    d2 = read_data_byte (&address);
+	if (flags & VERB) {
+	    unsigned int verb_num =
+		(flags & DATA_FIRST) == VERB_FIRST ? d1 : d2;
+	    verb_num ^= 0xFF;
+	    if (dict_verb_count < verb_num)
+		dict_verb_count = verb_num;
+	}
+	if (flags & PREP) {
+	    /* Can't usefully read prepositions from dictionary when compact. */
+	    if (*prep_type == 0) {
+		unsigned int prep_num =
+		    (flags & DATA_FIRST) == PREP_FIRST ? d1 : d2;
+		prep_num ^= 0xFF;
+		if (dict_prep_count < prep_num)
+		    dict_prep_count = prep_num;
+	    } else {
+		dict_prep_count++;
+	    }
+	}
+    }
+    dict_verb_count++;
+    if (*prep_type == 0)
+	dict_prep_count++;
+    address = header.dynamic_size;
+    while (!*prep_table_base && address < header.resident_size) {
+	unsigned int length_hi = read_data_byte (&address);
+	unsigned int i;
+	unsigned long prep_address = address;
+	if (length_hi == 0 &&
+	    read_data_byte (&prep_address) == dict_prep_count) {
+	    for (i = 0; i < dict_prep_count; i++) {
+		unsigned int prep_num;
+		unsigned int flags;
+		unsigned long word_address = read_data_word (&prep_address);
+		/* Check if we've found a dictionary word */
+		if (word_address < first_word || word_address > last_word ||
+		    ((word_address - first_word) % word_size != 0))
+		    break;
+
+		/* Check if that word is a preposition, and if so, the right
+		   preposition */
+		if (*prep_type == 0) {
+		    /* The prep_num here is the inverted (255-based) number */
+		    prep_num = read_data_word (&prep_address);
+		    word_address += word_text_size;
+		    flags = read_data_byte (&word_address);
+		    if (!(flags & PREP))
+			break;
+		    if ((flags & DATA_FIRST) != PREP_FIRST)
+			word_address++;
+		    if (prep_num != read_data_byte (&word_address))
+			break;
+		} else {
+		    /* The prep_num here is the inverted (255-based) number */
+		    prep_num = read_data_byte (&prep_address);
+		    /* Can only tell if number is sane, not if it is correct */
+		    if ((prep_num ^= 0xFF) >= dict_prep_count)
+			break;
+		}
+	    }
+	    if (i == dict_prep_count) {
+		*prep_table_base = address - 1;
+	    }
+	}
+	/* Due to a bug in ZILF, some prepositions can be missing from the table.  Allow
+           for this */
+	if (!*prep_table_base && *prep_type == 0 &&
+	    address >= header.resident_size && dict_prep_count > 0 &&
+	    --attempts > 0) {
+	    address = header.dynamic_size;
+	    dict_prep_count--;
+	}
+    }
+    /* Can't find the tables, sorry */
+    if (!*prep_table_base)
+	return;
+    *verb_count = dict_verb_count;
+    /* Verb table immediately follows prep table */
+    if (*prep_type == 0) {
+	*verb_table_base = *prep_table_base + 2 + dict_prep_count * 4;
+    } else {
+	*verb_table_base = *prep_table_base + 2 + dict_prep_count * 3;
+    }
+    *prep_table_end = *verb_table_base - 1;
+    /* Verb data base is given by first entry in verb table */
+    address = *verb_table_base;
+    *verb_data_base = read_data_word (&address);
+    *verb_data_end = header.resident_size - 1;
+    /* Same as for Infocom, detect variable-length grammar (COMPACT-SYNTAX?) */
+    if (dict_verb_count > 1)
+	next_entry = read_data_word (&address);
+    else
+	next_entry = *verb_data_end;
+    address = *verb_data_base;
+    entry_count = read_data_byte (&address);
+    if (((next_entry - *verb_data_base) / entry_count) <= 7)
+	*parser_type = infocom_variable;
+    /* Actions and pre-actions are sandwiched between verb table and verb data */
+    *action_table_base = *verb_table_base + dict_verb_count * 2;
+    *verb_table_end = *action_table_base - 1;
+    /* Each table entry is 2 bytes and there's two tables, hence the 4 */
+    *action_count = (*verb_data_base - *action_table_base) / 4;
+    *preact_table_base = *action_table_base + *action_count * 2;
+    *preact_table_end = *verb_data_base - 1;
+    *action_table_end = *preact_table_base - 1;
+}
 
 /*
  * show_verbs
